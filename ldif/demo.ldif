@@ -1,2 +1,19 @@
 # Demo LDIF for OpenLDAP
 
+# Update demo user with email
+dn: cn=demo,ou=users,dc=example,dc=com
+changetype: modify
+add: mail
+mail: demo@example.com
+
+# Create department groups
+dn: cn=dep1,ou=groups,dc=example,dc=com
+cn: dep1
+objectClass: groupOfNames
+member: cn=demo,ou=users,dc=example,dc=com
+
+dn: cn=dep2,ou=groups,dc=example,dc=com
+cn: dep2
+objectClass: groupOfNames
+member: cn=demo,ou=users,dc=example,dc=com
+
