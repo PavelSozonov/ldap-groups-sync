@@ -1,0 +1,43 @@
+version: 1
+
+identity:
+  user_attribute: "mail"
+
+ldap:
+  url: "${LDAP_URL}"
+  bind_dn: "${LDAP_BIND_DN}"
+  bind_password: "${LDAP_BIND_PASSWORD}"
+  base_dn: "dc=example,dc=com"
+  group:
+    object_class: "group"
+    membership_attr: "member"
+  user_filter: "(objectClass=user)"
+  tls:
+    verify: ${LDAP_VERIFY_TLS:-false}
+
+services:
+  - type: "openwebui"
+    name: "owui"
+    base_url: "${OWUI_BASE_URL}"
+    auth:
+      api_key: "${OWUI_ADMIN_API_KEY}"
+    http:
+      request_timeout_seconds: ${REQUEST_TIMEOUT_SECONDS:-10}
+      verify_tls: ${VERIFY_TLS:-false}
+    path_templates:
+      list_groups: "/api/v1/groups"
+      group_users: "/api/v1/groups/{group_id}/users"
+      add_user_to_group: "/api/v1/groups/{group_id}/users/add"
+      remove_user_from_group: "/api/v1/groups/{group_id}/users/{user_id}/remove"
+      list_users: "/api/v1/users"
+    group_mappings:
+      - ldap_group_dn: "cn=dep1,ou=groups,dc=example,dc=com"
+        target_group_name: "Demo Group A"
+      - ldap_group_dn: "cn=dep2,ou=groups,dc=example,dc=com"
+        target_group_name: "Demo Group B"
+
+sync:
+  interval_seconds: ${SYNC_INTERVAL_SECONDS:-60}
+  retries: ${SYNC_RETRIES:-3}
+  backoff_base_seconds: 0.5
+  max_backoff_seconds: 10
