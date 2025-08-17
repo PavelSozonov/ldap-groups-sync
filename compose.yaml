@@ -1,7 +1,7 @@
 services:
   sync:
     build: .
-    env_file: .env.example
+    env_file: .env
     ports:
       - '8000:8000'
     depends_on:
