@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
-from typing import Dict, Any
+from typing import Any, Dict, List
 
 import httpx
+
+from ..metrics import owui_http_errors_total, track_external_request
 
 
 class OpenWebUIAdapter:
@@ -39,19 +41,42 @@ class OpenWebUIAdapter:
         template = self.path_templates[key]
         return self.base_url + template.format(**params)
 
-    def list_groups(self) -> httpx.Response:
-        return self.client.get(self._url("list_groups"))
+    def list_groups(self) -> List[Dict[str, Any]]:
+        with track_external_request("owui"):
+            resp = self.client.get(self._url("list_groups"))
+        if resp.is_error:
+            owui_http_errors_total.inc()
+            resp.raise_for_status()
+        return resp.json()
 
-    def list_users(self) -> httpx.Response:
-        return self.client.get(self._url("list_users"))
+    def list_users(self) -> List[Dict[str, Any]]:
+        with track_external_request("owui"):
+            resp = self.client.get(self._url("list_users"))
+        if resp.is_error:
+            owui_http_errors_total.inc()
+            resp.raise_for_status()
+        return resp.json()
 
-    def list_group_users(self, group_id: str) -> httpx.Response:
-        return self.client.get(self._url("group_users", group_id=group_id))
+    def list_group_users(self, group_id: str) -> List[Dict[str, Any]]:
+        with track_external_request("owui"):
+            resp = self.client.get(self._url("group_users", group_id=group_id))
+        if resp.is_error:
+            owui_http_errors_total.inc()
+            resp.raise_for_status()
+        return resp.json()
 
-    def add_user_to_group(self, group_id: str, user_id: str) -> httpx.Response:
+    def add_user_to_group(self, group_id: str, user_id: str) -> None:
         url = self._url("add_user_to_group", group_id=group_id)
-        return self.client.post(url, json={"user_id": user_id})
+        with track_external_request("owui"):
+            resp = self.client.post(url, json={"user_id": user_id})
+        if resp.is_error:
+            owui_http_errors_total.inc()
+            resp.raise_for_status()
 
-    def remove_user_from_group(self, group_id: str, user_id: str) -> httpx.Response:
+    def remove_user_from_group(self, group_id: str, user_id: str) -> None:
         url = self._url("remove_user_from_group", group_id=group_id, user_id=user_id)
-        return self.client.delete(url)
+        with track_external_request("owui"):
+            resp = self.client.delete(url)
+        if resp.is_error:
+            owui_http_errors_total.inc()
+            resp.raise_for_status()
