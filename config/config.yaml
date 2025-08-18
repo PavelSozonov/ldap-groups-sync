@@ -62,9 +62,4 @@ services:
     retries: 2
     backoff_base_seconds: 0.3
     max_backoff_seconds: 5.0
-sync:
-  backoff_base_seconds: 0.5
-  interval_seconds: 60
-  max_backoff_seconds: 10
-  retries: 3
 version: 1

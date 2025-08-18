@@ -17,6 +17,7 @@ class ServiceConfig(BaseModel):
     http: dict | None = None
     path_templates: dict | None = None
     group_mappings: list[dict]
+    sync: dict | None = None
 
 
 class AppConfig(BaseModel):
@@ -24,7 +25,7 @@ class AppConfig(BaseModel):
     identity: dict
     ldap: dict
     services: list[ServiceConfig]
-    sync: dict
+    sync: dict | None = None
 
 
 def load_config(path: Path) -> AppConfig:

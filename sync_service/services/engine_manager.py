@@ -28,6 +28,8 @@ class EngineManager:
 
     def _build_engine_for_service(self, service_config) -> SyncEngine:
         """Build a sync engine for a specific service."""
+        service_name = service_config.name
+        
         # Create LDAP provider (shared across all engines)
         ldap_cfg = self.config.ldap
         identity_attr = self.config.identity["user_attribute"]
@@ -49,8 +51,10 @@ class EngineManager:
         # Create group mappings
         mappings = [GroupMapping(**m) for m in service_config.group_mappings]
         
-        # Get sync configuration (service-specific or global fallback)
-        sync_cfg = getattr(service_config, 'sync', None) or self.config.sync
+        # Get sync configuration (required for each service)
+        sync_cfg = getattr(service_config, 'sync', None)
+        if not sync_cfg:
+            raise ValueError(f"Service '{service_name}' must have sync configuration")
         
         return SyncEngine(
             directory=ldap_provider,
@@ -77,7 +81,9 @@ class EngineManager:
     async def _run_engine_loop(self, service_name: str, engine: SyncEngine) -> None:
         """Run sync loop for a specific engine."""
         service_config = next(s for s in self.config.services if s.name == service_name)
-        sync_cfg = getattr(service_config, 'sync', None) or self.config.sync
+        sync_cfg = getattr(service_config, 'sync', None)
+        if not sync_cfg:
+            raise ValueError(f"Service '{service_name}' must have sync configuration")
         interval = sync_cfg.get("interval_seconds", 60)
         
         logger.info(f"Starting sync loop for service: {service_name} (interval: {interval}s)")
