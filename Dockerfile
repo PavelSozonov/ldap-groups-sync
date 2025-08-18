@@ -12,6 +12,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY sync_service/ ./sync_service/
 COPY config/ ./config/
+COPY scripts/ ./scripts/
 
 # Change ownership to non-root user
 RUN chown -R appuser:appuser /app

@@ -47,6 +47,8 @@ class OpenWebUIAdapter:
         if resp.is_error:
             owui_http_errors_total.inc()
             resp.raise_for_status()
+        print(f"Response status: {resp.status_code}")
+        print(f"Response text: {resp.text}")
         return resp.json()
 
     def list_users(self) -> List[Dict[str, Any]]:

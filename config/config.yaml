@@ -1,43 +1,39 @@
-version: 1
-
 identity:
-  user_attribute: "mail"
-
+  user_attribute: mail
 ldap:
-  url: "ldap://openldap:1389"
-  bind_dn: "cn=admin,dc=example,dc=com"
-  bind_password: "adminpassword"
-  base_dn: "dc=example,dc=com"
+  base_dn: dc=example,dc=com
+  bind_dn: cn=admin,dc=example,dc=com
+  bind_password: adminpassword
   group:
-    object_class: "group"
-    membership_attr: "member"
-  user_filter: "(objectClass=user)"
+    membership_attr: member
+    object_class: group
   tls:
     verify: false
-
+  url: ldap://openldap:1389
+  user_filter: (objectClass=user)
 services:
-  - type: "openwebui"
-    name: "owui"
-    base_url: "http://openwebui:8080"
-    auth:
-      api_key: "your-admin-api-key-here"
-    http:
-      request_timeout_seconds: 10
-      verify_tls: false
-    path_templates:
-      list_groups: "/api/v1/groups"
-      group_users: "/api/v1/groups/{group_id}/users"
-      add_user_to_group: "/api/v1/groups/{group_id}/users/add"
-      remove_user_from_group: "/api/v1/groups/{group_id}/users/{user_id}/remove"
-      list_users: "/api/v1/users"
-    group_mappings:
-      - ldap_group_dn: "cn=dep1,ou=groups,dc=example,dc=com"
-        target_group_name: "Demo Group A"
-      - ldap_group_dn: "cn=dep2,ou=groups,dc=example,dc=com"
-        target_group_name: "Demo Group B"
-
+- auth:
+    api_key: GGucRRvXUh6xf9GKy1rmdD5LI7QH4i1m8NXcchdVOVNUr40afmOiKX7xrMQEIVkb
+  base_url: http://mock-api:8081
+  group_mappings:
+  - ldap_group_dn: cn=dep1,ou=groups,dc=example,dc=com
+    target_group_name: Demo Group A
+  - ldap_group_dn: cn=dep2,ou=groups,dc=example,dc=com
+    target_group_name: Demo Group B
+  http:
+    request_timeout_seconds: 10
+    verify_tls: false
+  name: owui
+  path_templates:
+    add_user_to_group: /api/v1/groups/{group_id}/users/add
+    group_users: /api/v1/groups/{group_id}/users
+    list_groups: /api/v1/groups
+    list_users: /api/v1/users
+    remove_user_from_group: /api/v1/groups/{group_id}/users/{user_id}/remove
+  type: openwebui
 sync:
-  interval_seconds: ${SYNC_INTERVAL_SECONDS:-60}
-  retries: ${SYNC_RETRIES:-3}
   backoff_base_seconds: 0.5
+  interval_seconds: ${SYNC_INTERVAL_SECONDS:-60}
   max_backoff_seconds: 10
+  retries: ${SYNC_RETRIES:-3}
+version: 1
