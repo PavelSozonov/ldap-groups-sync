@@ -14,7 +14,6 @@ COPY sync_service/ ./sync_service/
 COPY config/ ./config/
 COPY scripts/ ./scripts/
 COPY tests/ ./tests/
-COPY test_integration.py ./
 
 # Change ownership to non-root user
 RUN chown -R appuser:appuser /app

@@ -34,6 +34,12 @@
 - **Rationale**: OpenWebUI API expects array format for multiple users
 - **Implementation**: `{"user_ids": ["user_id1", "user_id2"]}`
 
+### User Removal Strategy
+- **Decision**: Use group update API instead of individual user removal
+- **Rationale**: OpenWebUI DELETE endpoints return 405 Method Not Allowed
+- **Implementation**: POST to `/api/v1/groups/id/{group_id}/update` with complete user list
+- **Benefits**: Atomic operation, avoids API compatibility issues
+
 ### Health Checks
 - **Decision**: Separate `/healthz` and `/readyz` endpoints
 - **Rationale**: Kubernetes best practices for liveness and readiness probes
@@ -74,3 +80,18 @@
 - **Decision**: Maintain mock API for development
 - **Rationale**: Faster development cycles without external dependencies
 - **Implementation**: FastAPI mock server with realistic responses
+
+## Implementation Decisions
+
+### LDAP Configuration
+- **Decision**: Use `groupOfNames` objectClass and `inetOrgPerson` for users
+- **Rationale**: Compatible with Bitnami OpenLDAP container defaults
+- **Implementation**: Updated `config.yaml` with correct objectClass values
+
+### OpenWebUI API Endpoints
+- **Decision**: Use specific endpoint patterns for different operations
+- **Implementation**:
+  - List groups: `/api/v1/groups/`
+  - List users: `/api/v1/users/` (returns `{"users": [...], "total": N}`)
+  - Add users: `/api/v1/groups/id/{group_id}/users/add`
+  - Update group: `/api/v1/groups/id/{group_id}/update`

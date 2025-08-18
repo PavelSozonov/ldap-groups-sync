@@ -258,7 +258,9 @@ The project includes comprehensive integration testing with real OpenWebUI:
 - OpenWebUI API authentication
 - Group membership synchronization
 - User addition to groups
+- User removal from groups (via group update)
 - Metrics collection and monitoring
+- Full bidirectional synchronization
 
 ## 📄 License
 
