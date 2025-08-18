@@ -2,7 +2,7 @@
 
 A stateless FastAPI service that periodically syncs LDAP group membership into OpenWebUI user groups using the OWUI admin API. Identity is matched by email. Users not yet present in OWUI are skipped with INFO log. Deletes only remove users from the corresponding OWUI group.
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Start All Services
 
@@ -17,9 +17,9 @@ docker compose ps
 ### 2. Automatic OpenWebUI Setup
 
 The system automatically:
-- ✅ Generates API key for OpenWebUI
-- ✅ Updates configuration with real API key
-- ✅ Starts sync service with correct settings
+- Generates API key for OpenWebUI
+- Updates configuration with real API key
+- Starts sync service with correct settings
 
 ### 3. Verify Operation
 
@@ -32,7 +32,7 @@ curl http://localhost:8000/healthz
 curl http://localhost:8000/readyz
 ```
 
-## 📋 Manual OpenWebUI Setup (if needed)
+## Manual OpenWebUI Setup (if needed)
 
 If automatic setup doesn't work, follow these steps:
 
@@ -59,7 +59,7 @@ echo "YOUR_API_KEY_HERE" > .owui_api_key
 python3 scripts/update_config.py
 ```
 
-## 🔧 Configuration
+## Configuration
 
 ### Environment Variables (.env)
 
@@ -88,7 +88,7 @@ group_mappings:
     target_group_name: "Demo Group B"
 ```
 
-## 📊 Monitoring
+## Monitoring
 
 ### Prometheus Metrics
 
@@ -115,7 +115,7 @@ curl http://localhost:8000/readyz
 curl http://localhost:8000/healthz
 ```
 
-## 🏗️ Architecture
+## Architecture
 
 ### Services
 
@@ -131,7 +131,7 @@ curl http://localhost:8000/healthz
 - **Sync Engine** - synchronization logic
 - **Metrics** - Prometheus metrics
 
-## 🧪 Testing
+## Testing
 
 ### Running Tests
 
@@ -149,7 +149,7 @@ Demo data is automatically loaded into OpenLDAP:
 - User: `demo@example.com`
 - Groups: `dep1`, `dep2`
 
-## 🔍 Debugging
+## Debugging
 
 ### Service Logs
 
@@ -174,7 +174,7 @@ docker compose exec sync ldapsearch -H ldap://openldap:1389 -D "cn=admin,dc=exam
 curl -H "Authorization: Bearer YOUR_API_KEY" http://localhost:8080/api/v1/groups
 ```
 
-## 📝 Development
+## Development
 
 ### Project Structure
 
@@ -198,7 +198,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" http://localhost:8080/api/v1/groups
 3. Update `sync_service/services/sync_engine.py`
 4. Add tests
 
-## 🚨 Troubleshooting
+## Troubleshooting
 
 ### OpenWebUI Issues
 
@@ -242,7 +242,7 @@ curl -H "Authorization: Bearer YOUR_API_KEY" http://localhost:8080/api/v1/groups
    cat config/config.yaml
    ```
 
-## 🔄 Integration Testing
+## Integration Testing
 
 The project includes comprehensive integration testing with real OpenWebUI:
 
@@ -253,7 +253,7 @@ The project includes comprehensive integration testing with real OpenWebUI:
 
 ### Test Results
 
-✅ **Successfully tested:**
+**Successfully tested:**
 - LDAP user and group discovery
 - OpenWebUI API authentication
 - Group membership synchronization
@@ -262,6 +262,6 @@ The project includes comprehensive integration testing with real OpenWebUI:
 - Metrics collection and monitoring
 - Full bidirectional synchronization
 
-## 📄 License
+## License
 
 MIT License
