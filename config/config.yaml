@@ -13,7 +13,7 @@ ldap:
   user_filter: (objectClass=user)
 services:
 - auth:
-    api_key: GGucRRvXUh6xf9GKy1rmdD5LI7QH4i1m8NXcchdVOVNUr40afmOiKX7xrMQEIVkb
+    api_key: JcTqnaSusdEA8cAiXzMsJ5azs52KuOXb1DuBv6aODxJOKJLBGV9TaiafwKNpVxiR
   base_url: http://mock-api:8081
   group_mappings:
   - ldap_group_dn: cn=dep1,ou=groups,dc=example,dc=com
@@ -33,7 +33,7 @@ services:
   type: openwebui
 sync:
   backoff_base_seconds: 0.5
-  interval_seconds: ${SYNC_INTERVAL_SECONDS:-60}
+  interval_seconds: 60
   max_backoff_seconds: 10
-  retries: ${SYNC_RETRIES:-3}
+  retries: 3
 version: 1

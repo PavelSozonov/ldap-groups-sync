@@ -15,9 +15,11 @@ def main() -> None:
 
     client = httpx.Client(headers={"Authorization": f"Bearer {args.api_key}"})
     for group in args.group:
-        resp = client.post(f"{args.base_url}/api/v1/groups", json={"name": group})
+        resp = client.post(f"{args.base_url}/api/v1/groups/create", json={"name": group})
         if resp.status_code >= 400:
             print(f"Failed to create group {group}: {resp.text}")
+        else:
+            print(f"✅ Successfully created group: {group}")
 
 
 if __name__ == "__main__":
