@@ -13,8 +13,8 @@ ldap:
   user_filter: (objectClass=user)
 services:
 - auth:
-    api_key: JcTqnaSusdEA8cAiXzMsJ5azs52KuOXb1DuBv6aODxJOKJLBGV9TaiafwKNpVxiR
-  base_url: http://mock-api:8081
+    api_key: Te8VQVIe6ESVsePxkjzN3BF8Tcliixu0oUkAhgta8fECkBQrq5ukrRE4TwaZVA7Q
+  base_url: http://openwebui:8080
   group_mappings:
   - ldap_group_dn: cn=dep1,ou=groups,dc=example,dc=com
     target_group_name: Demo Group A
@@ -25,11 +25,11 @@ services:
     verify_tls: false
   name: owui
   path_templates:
-    add_user_to_group: /api/v1/groups/{group_id}/users/add
-    group_users: /api/v1/groups/{group_id}/users
-    list_groups: /api/v1/groups
-    list_users: /api/v1/users
-    remove_user_from_group: /api/v1/groups/{group_id}/users/{user_id}/remove
+    add_user_to_group: /api/v1/groups/id/{group_id}/users/add
+    group_users: /api/v1/groups/
+    list_groups: /api/v1/groups/
+    list_users: /api/v1/users/
+    remove_user_from_group: /api/v1/groups/id/{group_id}/users/{user_id}/remove
   type: openwebui
 sync:
   backoff_base_seconds: 0.5

@@ -1,0 +1,4 @@
+dn: cn=demo,ou=users,dc=example,dc=com
+changetype: modify
+add: mail
+mail: demo@example.com

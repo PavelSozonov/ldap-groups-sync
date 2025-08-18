@@ -1,0 +1,9 @@
+dn: cn=dep1,ou=groups,dc=example,dc=com
+changetype: modify
+add: member
+member: cn=demo,ou=users,dc=example,dc=com
+
+dn: cn=dep2,ou=groups,dc=example,dc=com
+changetype: modify
+add: member
+member: cn=demo,ou=users,dc=example,dc=com

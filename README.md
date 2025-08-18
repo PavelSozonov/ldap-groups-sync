@@ -1,67 +1,67 @@
 # LDAP Groups Sync
 
-Сервис для синхронизации групп пользователей между LDAP и OpenWebUI.
+A stateless FastAPI service that periodically syncs LDAP group membership into OpenWebUI user groups using the OWUI admin API. Identity is matched by email. Users not yet present in OWUI are skipped with INFO log. Deletes only remove users from the corresponding OWUI group.
 
-## 🚀 Быстрый старт
+## 🚀 Quick Start
 
-### 1. Запуск всех сервисов
+### 1. Start All Services
 
 ```bash
-# Запуск всех сервисов
+# Start all services
 docker compose up -d
 
-# Проверка статуса
+# Check status
 docker compose ps
 ```
 
-### 2. Автоматическая настройка OpenWebUI
+### 2. Automatic OpenWebUI Setup
 
-Система автоматически:
-- ✅ Генерирует API ключ для OpenWebUI
-- ✅ Обновляет конфигурацию с реальным API ключом
-- ✅ Запускает sync сервис с правильными настройками
+The system automatically:
+- ✅ Generates API key for OpenWebUI
+- ✅ Updates configuration with real API key
+- ✅ Starts sync service with correct settings
 
-### 3. Проверка работы
+### 3. Verify Operation
 
 ```bash
-# Проверка метрик sync сервиса
+# Check sync service metrics
 curl http://localhost:8000/metrics
 
-# Проверка health endpoints
+# Check health endpoints
 curl http://localhost:8000/healthz
 curl http://localhost:8000/readyz
 ```
 
-## 📋 Ручная настройка OpenWebUI (если нужно)
+## 📋 Manual OpenWebUI Setup (if needed)
 
-Если автоматическая настройка не работает, выполните следующие шаги:
+If automatic setup doesn't work, follow these steps:
 
-### 1. Откройте OpenWebUI в браузере
+### 1. Open OpenWebUI in browser
 ```
 http://localhost:8080
 ```
 
-### 2. Создайте админ аккаунт
+### 2. Create admin account
 - **Email**: `admin@example.com`
 - **Password**: `adminpassword`
 
-### 3. Создайте API ключ
-1. Перейдите в **Settings > Account**
-2. Создайте новый API ключ
-3. Скопируйте ключ
+### 3. Create API key
+1. Go to **Settings > Account**
+2. Create new API key
+3. Copy the key
 
-### 4. Обновите конфигурацию
+### 4. Update configuration
 ```bash
-# Сохраните API ключ в файл
+# Save API key to file
 echo "YOUR_API_KEY_HERE" > .owui_api_key
 
-# Обновите конфигурацию
+# Update configuration
 python3 scripts/update_config.py
 ```
 
-## 🔧 Конфигурация
+## 🔧 Configuration
 
-### Переменные окружения (.env)
+### Environment Variables (.env)
 
 ```bash
 # LDAP Configuration
@@ -78,7 +78,7 @@ OWUI_ADMIN_PASSWORD=adminpassword
 OWUI_ADMIN_NAME=Admin User
 ```
 
-### Маппинг групп (config/config.yaml)
+### Group Mappings (config/config.yaml)
 
 ```yaml
 group_mappings:
@@ -88,157 +88,178 @@ group_mappings:
     target_group_name: "Demo Group B"
 ```
 
-## 📊 Мониторинг
+## 📊 Monitoring
 
-### Метрики Prometheus
+### Prometheus Metrics
 
 ```bash
-# Получить все метрики
+# Get all metrics
 curl http://localhost:8000/metrics
 
-# Ключевые метрики:
-# - sync_iterations_total - количество итераций синхронизации
-# - external_request_seconds - время запросов к внешним сервисам
-# - owui_http_errors_total - ошибки HTTP запросов к OpenWebUI
-# - ldap_lookup_errors_total - ошибки поиска в LDAP
+# Key metrics:
+# - sync_iterations_total - number of sync iterations
+# - external_request_seconds - external service request duration
+# - owui_http_errors_total - OpenWebUI HTTP errors
+# - ldap_lookup_errors_total - LDAP lookup errors
+# - owui_add_total - users added to OpenWebUI groups
+# - owui_delete_total - users removed from OpenWebUI groups
 ```
 
 ### Health Checks
 
 ```bash
-# Проверка готовности
+# Readiness check
 curl http://localhost:8000/readyz
 
-# Проверка здоровья
+# Health check
 curl http://localhost:8000/healthz
 ```
 
-## 🏗️ Архитектура
+## 🏗️ Architecture
 
-### Сервисы
+### Services
 
-1. **OpenLDAP** - источник данных о пользователях и группах
-2. **OpenWebUI** - целевая система для синхронизации
-3. **Sync Service** - основной сервис синхронизации
-4. **Mock API** - тестовый API для разработки
+1. **OpenLDAP** - source of user and group data
+2. **OpenWebUI** - target system for synchronization
+3. **Sync Service** - main synchronization service
+4. **Mock API** - test API for development
 
-### Компоненты
+### Components
 
-- **LDAP Provider** - подключение к LDAP
-- **OpenWebUI Adapter** - взаимодействие с OpenWebUI API
-- **Sync Engine** - логика синхронизации
-- **Metrics** - метрики Prometheus
+- **LDAP Provider** - LDAP connection
+- **OpenWebUI Adapter** - OpenWebUI API interaction
+- **Sync Engine** - synchronization logic
+- **Metrics** - Prometheus metrics
 
-## 🧪 Тестирование
+## 🧪 Testing
 
-### Запуск тестов
+### Running Tests
 
 ```bash
-# Unit тесты
+# Unit tests
 pytest tests/
 
-# Интеграционные тесты
+# Integration tests
 pytest tests/integration/
 ```
 
-### Тестовые данные
+### Test Data
 
-Демо данные загружаются автоматически в OpenLDAP:
-- Пользователь: `demo@example.com`
-- Группы: `dep1`, `dep2`
+Demo data is automatically loaded into OpenLDAP:
+- User: `demo@example.com`
+- Groups: `dep1`, `dep2`
 
-## 🔍 Отладка
+## 🔍 Debugging
 
-### Логи сервисов
+### Service Logs
 
 ```bash
-# Логи sync сервиса
+# Sync service logs
 docker compose logs sync
 
-# Логи OpenWebUI
+# OpenWebUI logs
 docker compose logs openwebui
 
-# Логи OpenLDAP
+# OpenLDAP logs
 docker compose logs openldap
 ```
 
-### Проверка подключений
+### Connection Verification
 
 ```bash
-# Проверка LDAP
+# Check LDAP
 docker compose exec sync ldapsearch -H ldap://openldap:1389 -D "cn=admin,dc=example,dc=com" -w adminpassword -b "dc=example,dc=com"
 
-# Проверка OpenWebUI API
+# Check OpenWebUI API
 curl -H "Authorization: Bearer YOUR_API_KEY" http://localhost:8080/api/v1/groups
 ```
 
-## 📝 Разработка
+## 📝 Development
 
-### Структура проекта
+### Project Structure
 
 ```
-├── sync_service/          # Основной код
-│   ├── adapters/         # Адаптеры для внешних сервисов
-│   ├── domain/           # Доменные модели
-│   ├── services/         # Бизнес-логика
-│   └── utils/            # Утилиты
-├── scripts/              # Скрипты настройки
-├── config/               # Конфигурация
-├── tests/                # Тесты
+├── sync_service/          # Main code
+│   ├── adapters/         # External service adapters
+│   ├── domain/           # Domain models
+│   ├── services/         # Business logic
+│   └── utils/            # Utilities
+├── scripts/              # Setup scripts
+├── config/               # Configuration
+├── tests/                # Tests
+├── ldif/                 # LDAP data files
 └── compose.yaml          # Docker Compose
 ```
 
-### Добавление нового сервиса
+### Adding New Service
 
-1. Создайте адаптер в `sync_service/adapters/`
-2. Добавьте конфигурацию в `config/config.yaml`
-3. Обновите `sync_service/services/sync_engine.py`
-4. Добавьте тесты
+1. Create adapter in `sync_service/adapters/`
+2. Add configuration in `config/config.yaml`
+3. Update `sync_service/services/sync_engine.py`
+4. Add tests
 
-## 🚨 Устранение неполадок
+## 🚨 Troubleshooting
 
-### Проблемы с OpenWebUI
+### OpenWebUI Issues
 
-1. **OpenWebUI не отвечает**
+1. **OpenWebUI not responding**
    ```bash
-   # Проверьте статус
+   # Check status
    docker compose ps openwebui
    
-   # Проверьте логи
+   # Check logs
    docker compose logs openwebui
    ```
 
-2. **API ключ не работает**
+2. **API key not working**
    ```bash
-   # Перегенерируйте ключ
+   # Regenerate key
    python3 scripts/generate_api_key.py
    
-   # Обновите конфигурацию
+   # Update configuration
    python3 scripts/update_config.py
    ```
 
-### Проблемы с LDAP
+### LDAP Issues
 
-1. **Не удается подключиться к LDAP**
+1. **Cannot connect to LDAP**
    ```bash
-   # Проверьте переменные окружения
+   # Check environment variables
    cat .env
    
-   # Проверьте подключение
+   # Test connection
    docker compose exec sync ldapsearch -H ldap://openldap:1389 -D "cn=admin,dc=example,dc=com" -w adminpassword -b "dc=example,dc=com"
    ```
 
-### Проблемы с синхронизацией
+### Synchronization Issues
 
-1. **Sync сервис не запускается**
+1. **Sync service not starting**
    ```bash
-   # Проверьте логи
+   # Check logs
    docker compose logs sync
    
-   # Проверьте конфигурацию
+   # Check configuration
    cat config/config.yaml
    ```
 
-## 📄 Лицензия
+## 🔄 Integration Testing
+
+The project includes comprehensive integration testing with real OpenWebUI:
+
+1. **Real OpenWebUI API** - Tests against actual OpenWebUI endpoints
+2. **LDAP Integration** - Real LDAP server with demo data
+3. **End-to-End Sync** - Complete synchronization workflow
+4. **Metrics Validation** - Prometheus metrics verification
+
+### Test Results
+
+✅ **Successfully tested:**
+- LDAP user and group discovery
+- OpenWebUI API authentication
+- Group membership synchronization
+- User addition to groups
+- Metrics collection and monitoring
+
+## 📄 License
 
 MIT License

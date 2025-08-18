@@ -70,7 +70,7 @@ class OpenWebUIAdapter:
     def add_user_to_group(self, group_id: str, user_id: str) -> None:
         url = self._url("add_user_to_group", group_id=group_id)
         with track_external_request("owui"):
-            resp = self.client.post(url, json={"user_id": user_id})
+            resp = self.client.post(url, json={"user_ids": [user_id]})
         if resp.is_error:
             owui_http_errors_total.inc()
             resp.raise_for_status()

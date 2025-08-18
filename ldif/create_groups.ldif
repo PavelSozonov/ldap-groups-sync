@@ -1,0 +1,9 @@
+dn: cn=dep1,ou=groups,dc=example,dc=com
+objectClass: groupOfNames
+cn: dep1
+member: cn=demo,ou=users,dc=example,dc=com
+
+dn: cn=dep2,ou=groups,dc=example,dc=com
+objectClass: groupOfNames
+cn: dep2
+member: cn=demo,ou=users,dc=example,dc=com

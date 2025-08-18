@@ -52,6 +52,7 @@ class SyncEngine:
         def _run() -> None:
             start = perf_counter()
             all_users = {u["email"]: u["id"] for u in self.adapter.list_users()}
+            all_groups = self.adapter.list_groups()
             for mapping in self.mappings:
                 group_id = self.group_name_to_id.get(mapping.target_group_name)
                 if not group_id:
@@ -61,11 +62,26 @@ class SyncEngine:
                     )
                     sync_errors_total.labels(target="owui", kind="missing_group").inc()
                     continue
+                
+                # Find the group and get its user_ids
+                group = next((g for g in all_groups if g["id"] == group_id), None)
+                if not group:
+                    logger.error(
+                        "group_not_found",
+                        extra={"group_id": group_id, "target_group": mapping.target_group_name},
+                    )
+                    sync_errors_total.labels(target="owui", kind="missing_group").inc()
+                    continue
+                
+                # Get user IDs in the group and map them to emails
+                group_user_ids = group.get("user_ids", [])
+                group_users = [u for u in all_users.values() if u in group_user_ids]
+                target_emails = {u["email"] for u in self.adapter.list_users() if u["id"] in group_user_ids}
+                email_to_id = {u["email"]: u["id"] for u in self.adapter.list_users() if u["id"] in group_user_ids}
+                
                 ldap_emails = self.directory.get_group_members(mapping.ldap_group_dn)
-                group_members = self.adapter.list_group_users(group_id)
-                target_emails = {u["email"] for u in group_members}
-                email_to_id = {u["email"]: u["id"] for u in group_members}
                 adds, deletes = diff_members(ldap_emails, target_emails)
+                
                 for email in adds:
                     user_id = all_users.get(email)
                     if user_id:
