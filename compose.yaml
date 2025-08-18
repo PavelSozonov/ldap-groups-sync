@@ -7,7 +7,6 @@ services:
     depends_on:
       - openldap
       - openwebui
-      - config-updater
   openldap:
     image: bitnami/openldap
     environment:
@@ -34,24 +33,25 @@ services:
     ports:
       - '8081:8081'
   
-  owui-setup:
-    build: .
-    command: python scripts/generate_api_key.py
-    environment:
-      - OWUI_ADMIN_NAME=Admin User
-      - OWUI_ADMIN_EMAIL=admin@example.com
-      - OWUI_ADMIN_PASSWORD=adminpassword
-      - OWUI_BASE_URL=http://openwebui:8080
-    depends_on:
-      - openwebui
-    volumes:
-      - ./.owui_api_key:/app/.owui_api_key
-  
-  config-updater:
-    build: .
-    command: python scripts/update_config.py
-    volumes:
-      - ./config:/app/config
-      - ./.owui_api_key:/app/.owui_api_key
-    depends_on:
-      - owui-setup
+  # Disabled to prevent API key overwrites
+  # owui-setup:
+  #   build: .
+  #   command: python scripts/generate_api_key.py
+  #   environment:
+  #     - OWUI_ADMIN_NAME=Admin User
+  #     - OWUI_ADMIN_EMAIL=admin@example.com
+  #     - OWUI_ADMIN_PASSWORD=adminpassword
+  #     - OWUI_BASE_URL=http://openwebui:8080
+  #   depends_on:
+  #     - openwebui
+  #   volumes:
+  #     - ./.owui_api_key:/app/.owui_api_key
+
+  # config-updater:
+  #   build: .
+  #   command: python scripts/update_config.py
+  #   volumes:
+  #     - ./config:/app/config
+  #     - ./.owui_api_key:/app/.owui_api_key
+  #   depends_on:
+  #     - owui-setup

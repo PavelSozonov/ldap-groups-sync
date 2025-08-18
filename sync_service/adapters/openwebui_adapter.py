@@ -57,7 +57,11 @@ class OpenWebUIAdapter:
         if resp.is_error:
             owui_http_errors_total.inc()
             resp.raise_for_status()
-        return resp.json()
+        data = resp.json()
+        # OpenWebUI returns {"users": [...], "total": N} format
+        if isinstance(data, dict) and "users" in data:
+            return data["users"]
+        return data
 
     def list_group_users(self, group_id: str) -> List[Dict[str, Any]]:
         with track_external_request("owui"):
