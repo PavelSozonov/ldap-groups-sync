@@ -21,3 +21,4 @@
 - pytest for unit tests (no external network); compose-based integration tests for dependent services.
 - Professional README; MIT LICENSE at root.
 - Keep prompts/specs in `PROMPT/` as source of truth.
+- Do not use emojis in code, comments, documentation, or commit messages. Use plain text only.
