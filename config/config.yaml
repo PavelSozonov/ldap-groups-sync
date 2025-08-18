@@ -32,6 +32,36 @@ services:
     remove_user_from_group: /api/v1/groups/id/{group_id}/users/{user_id}/remove
     update_group: /api/v1/groups/id/{group_id}/update
   type: openwebui
+  sync:
+    interval_seconds: 60
+    retries: 3
+    backoff_base_seconds: 0.5
+    max_backoff_seconds: 10.0
+- auth:
+    api_key: mock-key
+  base_url: http://mock-api:8081
+  group_mappings:
+  - ldap_group_dn: cn=dep1,ou=groups,dc=example,dc=com
+    target_group_name: Mock Group 1
+  - ldap_group_dn: cn=dep2,ou=groups,dc=example,dc=com
+    target_group_name: Mock Group 2
+  http:
+    request_timeout_seconds: 5
+    verify_tls: false
+  name: mock
+  path_templates:
+    add_user_to_group: /api/v1/groups/{group_id}/users/add
+    group_users: /api/v1/groups/{group_id}/users
+    list_groups: /api/v1/groups
+    list_users: /api/v1/users
+    remove_user_from_group: /api/v1/groups/{group_id}/users/{user_id}/remove
+    update_group: /api/v1/groups/{group_id}
+  type: mock
+  sync:
+    interval_seconds: 30
+    retries: 2
+    backoff_base_seconds: 0.3
+    max_backoff_seconds: 5.0
 sync:
   backoff_base_seconds: 0.5
   interval_seconds: 60
