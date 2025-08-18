@@ -86,3 +86,17 @@ class OpenWebUIAdapter:
         if resp.is_error:
             owui_http_errors_total.inc()
             resp.raise_for_status()
+
+    def update_group_users(self, group_id: str, user_ids: List[str], group_name: str, group_description: str = "") -> None:
+        """Update the entire user list for a group."""
+        url = self._url("update_group", group_id=group_id)
+        data = {
+            "name": group_name,
+            "description": group_description,
+            "user_ids": user_ids
+        }
+        with track_external_request("owui"):
+            resp = self.client.post(url, json=data)
+        if resp.is_error:
+            owui_http_errors_total.inc()
+            resp.raise_for_status()

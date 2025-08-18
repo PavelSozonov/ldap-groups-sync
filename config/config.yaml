@@ -30,6 +30,7 @@ services:
     list_groups: /api/v1/groups/
     list_users: /api/v1/users/
     remove_user_from_group: /api/v1/groups/id/{group_id}/users/{user_id}/remove
+    update_group: /api/v1/groups/id/{group_id}/update
   type: openwebui
 sync:
   backoff_base_seconds: 0.5

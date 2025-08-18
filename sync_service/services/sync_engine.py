@@ -112,29 +112,38 @@ class SyncEngine:
                 adds, deletes = diff_members(ldap_emails, target_emails)
                 logger.info(f"Sync plan for '{mapping.target_group_name}': add {adds}, remove {deletes}")
                 
-                for email in adds:
-                    user_id = all_users.get(email)
-                    if user_id:
-                        logger.info(f"Adding user {email} (id: {user_id}) to group {mapping.target_group_name} (id: {group_id})")
-                        try:
-                            self.adapter.add_user_to_group(group_id, user_id)
-                            owui_add_total.inc()
-                            logger.info(f"Successfully added user {email} to group {mapping.target_group_name}")
-                        except Exception as e:
-                            logger.error(f"Failed to add user {email} to group {mapping.target_group_name}: {e}")
-                    else:
-                        logger.info(f"User {email} not found in OpenWebUI, skipping")
+                if adds or deletes:
+                    # Calculate the desired user IDs for the group
+                    desired_user_ids = []
+                    for email in ldap_emails:
+                        user_id = all_users.get(email)
+                        if user_id:
+                            desired_user_ids.append(user_id)
+                        else:
+                            logger.info(f"User {email} not found in OpenWebUI, skipping")
+                    
+                    logger.info(f"Updating group '{mapping.target_group_name}' to have users: {desired_user_ids}")
+                    try:
+                        # Update the entire group with the correct user list
+                        self.adapter.update_group_users(
+                            group_id=group_id, 
+                            user_ids=desired_user_ids,
+                            group_name=mapping.target_group_name,
+                            group_description=group.get("description", "")
+                        )
                         
-                for email in deletes:
-                    user_id = email_to_id.get(email)
-                    if user_id:
-                        logger.info(f"Removing user {email} (id: {user_id}) from group {mapping.target_group_name} (id: {group_id})")
-                        try:
-                            self.adapter.remove_user_from_group(group_id, user_id)
-                            owui_delete_total.inc()
-                            logger.info(f"Successfully removed user {email} from group {mapping.target_group_name}")
-                        except Exception as e:
-                            logger.error(f"Failed to remove user {email} from group {mapping.target_group_name}: {e}")
+                        # Update metrics
+                        if adds:
+                            owui_add_total.inc(len(adds))
+                            logger.info(f"Successfully added {len(adds)} users to group {mapping.target_group_name}")
+                        if deletes:
+                            owui_delete_total.inc(len(deletes))
+                            logger.info(f"Successfully removed {len(deletes)} users from group {mapping.target_group_name}")
+                            
+                    except Exception as e:
+                        logger.error(f"Failed to update group {mapping.target_group_name}: {e}")
+                else:
+                    logger.info(f"No changes needed for group '{mapping.target_group_name}'")
             duration = perf_counter() - start
             sync_iteration_seconds.observe(duration)
             logger.info(f"Sync iteration completed in {duration:.2f} seconds")
