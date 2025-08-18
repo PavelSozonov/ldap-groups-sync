@@ -1,6 +1,6 @@
 # LDAP Groups Sync
 
-A stateless FastAPI service that periodically syncs LDAP group membership into OpenWebUI user groups using the OWUI admin API. Identity is matched by email. Users not yet present in OWUI are skipped with INFO log. Deletes only remove users from the corresponding OWUI group.
+A stateless FastAPI service that periodically syncs LDAP group membership into multiple target services (OpenWebUI, mock services, etc.) using their respective admin APIs. Identity is matched by email. Users not yet present in target services are skipped with INFO log. The service supports multiple engines running in parallel, each with its own configuration and sync intervals.
 
 ## Quick Start
 
@@ -14,12 +14,12 @@ docker compose up -d
 docker compose ps
 ```
 
-### 2. Automatic OpenWebUI Setup
+### 2. Automatic Setup
 
 The system automatically:
-- Generates API key for OpenWebUI
-- Updates configuration with real API key
-- Starts sync service with correct settings
+- Generates API keys for target services
+- Updates configuration with real API keys
+- Starts multiple sync engines with correct settings
 
 ### 3. Verify Operation
 
@@ -32,27 +32,26 @@ curl http://localhost:8000/healthz
 curl http://localhost:8000/readyz
 ```
 
-## Manual OpenWebUI Setup (if needed)
+## Manual Setup (if needed)
 
 If automatic setup doesn't work, follow these steps:
 
-### 1. Open OpenWebUI in browser
+### 1. Open target services in browser
 ```
-http://localhost:8080
+OpenWebUI: http://localhost:8080
 ```
 
-### 2. Create admin account
-- **Email**: `admin@example.com`
-- **Password**: `adminpassword`
+### 2. Create admin accounts
+- **OpenWebUI**: Email `admin@example.com`, Password `adminpassword`
 
-### 3. Create API key
-1. Go to **Settings > Account**
+### 3. Create API keys
+1. Go to **Settings > Account** in each service
 2. Create new API key
 3. Copy the key
 
 ### 4. Update configuration
 ```bash
-# Save API key to file
+# Save API keys to files
 echo "YOUR_API_KEY_HERE" > .owui_api_key
 
 # Update configuration
@@ -78,14 +77,21 @@ OWUI_ADMIN_PASSWORD=adminpassword
 OWUI_ADMIN_NAME=Admin User
 ```
 
-### Group Mappings (config/config.yaml)
+### Service Configuration (config/config.yaml)
 
 ```yaml
-group_mappings:
-  - ldap_group_dn: "cn=dep1,ou=groups,dc=example,dc=com"
-    target_group_name: "Demo Group A"
-  - ldap_group_dn: "cn=dep2,ou=groups,dc=example,dc=com"
-    target_group_name: "Demo Group B"
+services:
+- name: owui
+  type: openwebui
+  base_url: http://openwebui:8080
+  group_mappings:
+    - ldap_group_dn: "cn=dep1,ou=groups,dc=example,dc=com"
+      target_group_name: "Demo Group A"
+    - ldap_group_dn: "cn=dep2,ou=groups,dc=example,dc=com"
+      target_group_name: "Demo Group B"
+  sync:
+    interval_seconds: 60
+    retries: 3
 ```
 
 ## Monitoring
@@ -120,15 +126,16 @@ curl http://localhost:8000/healthz
 ### Services
 
 1. **OpenLDAP** - source of user and group data
-2. **OpenWebUI** - target system for synchronization
-3. **Sync Service** - main synchronization service
-4. **Mock API** - test API for development
+2. **OpenWebUI** - primary target system for synchronization
+3. **Mock API** - test API for development and validation
+4. **Sync Service** - main synchronization service with multi-engine support
 
 ### Components
 
 - **LDAP Provider** - LDAP connection
-- **OpenWebUI Adapter** - OpenWebUI API interaction
-- **Sync Engine** - synchronization logic
+- **Service Adapters** - API interaction for different target services
+- **Engine Manager** - manages multiple sync engines
+- **Sync Engines** - individual synchronization logic per service
 - **Metrics** - Prometheus metrics
 
 ## Testing
@@ -194,21 +201,21 @@ curl -H "Authorization: Bearer YOUR_API_KEY" http://localhost:8080/api/v1/groups
 ### Adding New Service
 
 1. Create adapter in `sync_service/adapters/`
-2. Add configuration in `config/config.yaml`
-3. Update `sync_service/services/sync_engine.py`
+2. Add adapter to factory in `sync_service/adapters/factory.py`
+3. Add service configuration in `config/config.yaml`
 4. Add tests
 
 ## Troubleshooting
 
-### OpenWebUI Issues
+### Service Issues
 
-1. **OpenWebUI not responding**
+1. **Target service not responding**
    ```bash
    # Check status
-   docker compose ps openwebui
+   docker compose ps
    
    # Check logs
-   docker compose logs openwebui
+   docker compose logs
    ```
 
 2. **API key not working**
@@ -218,6 +225,15 @@ curl -H "Authorization: Bearer YOUR_API_KEY" http://localhost:8080/api/v1/groups
    
    # Update configuration
    python3 scripts/update_config.py
+   ```
+
+3. **Engine not starting**
+   ```bash
+   # Check engine status
+   curl http://localhost:8000/engines/status
+   
+   # Check sync service logs
+   docker compose logs sync
    ```
 
 ### LDAP Issues
@@ -244,21 +260,25 @@ curl -H "Authorization: Bearer YOUR_API_KEY" http://localhost:8080/api/v1/groups
 
 ## Integration Testing
 
-The project includes comprehensive integration testing with real OpenWebUI:
+The project includes comprehensive integration testing with multiple target services:
 
 1. **Real OpenWebUI API** - Tests against actual OpenWebUI endpoints
-2. **LDAP Integration** - Real LDAP server with demo data
-3. **End-to-End Sync** - Complete synchronization workflow
-4. **Metrics Validation** - Prometheus metrics verification
+2. **Mock API** - Tests against mock service for validation
+3. **LDAP Integration** - Real LDAP server with demo data
+4. **Multi-Engine Sync** - Parallel synchronization to multiple services
+5. **End-to-End Sync** - Complete synchronization workflow
+6. **Metrics Validation** - Prometheus metrics verification
 
 ### Test Results
 
 **Successfully tested:**
 - LDAP user and group discovery
 - OpenWebUI API authentication
+- Mock service integration
 - Group membership synchronization
 - User addition to groups
 - User removal from groups (via group update)
+- Multi-engine parallel operation
 - Metrics collection and monitoring
 - Full bidirectional synchronization
 

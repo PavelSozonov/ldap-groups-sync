@@ -71,15 +71,20 @@
 
 ## Testing Decisions
 
+### Multi-Engine Architecture
+- **Decision**: Support multiple sync engines running in parallel
+- **Rationale**: Enables synchronization to multiple target services simultaneously
+- **Implementation**: EngineManager class with asyncio tasks for each service
+
 ### Integration Testing
-- **Decision**: Real OpenWebUI API for integration tests
-- **Rationale**: Ensures compatibility with actual API behavior
-- **Implementation**: Docker Compose with real OpenWebUI container
+- **Decision**: Real OpenWebUI API and Mock API for integration tests
+- **Rationale**: Ensures compatibility with actual API behavior and provides validation
+- **Implementation**: Docker Compose with real OpenWebUI container and mock service
 
 ### Mock API
-- **Decision**: Maintain mock API for development
-- **Rationale**: Faster development cycles without external dependencies
-- **Implementation**: FastAPI mock server with realistic responses
+- **Decision**: Maintain mock API for development and testing
+- **Rationale**: Faster development cycles and validation of multi-engine functionality
+- **Implementation**: FastAPI mock server with realistic responses and MockAdapter
 
 ## Implementation Decisions
 
@@ -95,3 +100,13 @@
   - List users: `/api/v1/users/` (returns `{"users": [...], "total": N}`)
   - Add users: `/api/v1/groups/id/{group_id}/users/add`
   - Update group: `/api/v1/groups/id/{group_id}/update`
+
+### Service Configuration
+- **Decision**: Each service must have explicit sync configuration
+- **Rationale**: Eliminates confusion and makes configuration explicit
+- **Implementation**: Required sync field in ServiceConfig, no global fallback
+
+### Engine Management
+- **Decision**: Use asyncio tasks for parallel engine execution
+- **Rationale**: Enables true parallelism and independent engine operation
+- **Implementation**: EngineManager with task lifecycle management

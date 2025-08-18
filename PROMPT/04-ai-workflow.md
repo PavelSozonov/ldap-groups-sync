@@ -8,7 +8,7 @@
 - Changes to requirements must update PROMPT files and DECISIONS.md
 
 ### Iterative Development
-- Scaffold -> adapters -> sync engine -> tests
+- Scaffold -> adapters -> sync engine -> engine manager -> tests
 - Each iteration builds upon the previous one
 - Validate each step before proceeding
 
@@ -25,7 +25,7 @@
 - Update DECISIONS.md with architectural decisions
 
 ### 2. Implementation Phase
-- Follow iterative approach: scaffold -> adapters -> sync engine -> tests
+- Follow iterative approach: scaffold -> adapters -> sync engine -> engine manager -> tests
 - Implement features incrementally
 - Run quality checks after each change
 
@@ -69,17 +69,19 @@
 
 ### 2. Manual Testing
 - Create test data in LDAP
-- Create test groups in OpenWebUI
-- Verify synchronization works
+- Create test groups in target services
+- Verify synchronization works for all engines
 
 ### 3. Automated Testing
 - Run integration tests
 - Verify metrics collection
 - Check error handling
+- Validate multi-engine operation
 
 ### 4. Validation
 - Confirm sync service operates correctly
 - Verify monitoring and observability
+- Validate engine status endpoint
 - Document any issues found
 
 ## Maintenance
