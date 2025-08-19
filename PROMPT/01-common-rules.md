@@ -16,8 +16,9 @@
 - Graceful shutdown on SIGTERM/SIGINT.
 - Secrets only via env; never in repo or logs.
 - TLS verification configurable for test vs. prod; clearly document risks.
-- Containers run as non-root, minimal layers; healthcheck included.
+- Containers run as non-root, minimal layers; healthcheck defined in K8s manifests, not Dockerfile.
 - Docker Compose for local dev; K8s-ready logging.
 - pytest for unit tests (no external network); compose-based integration tests for dependent services.
 - Professional README; MIT LICENSE at root.
 - Keep prompts/specs in `PROMPT/` as source of truth.
+- Do not use emojis in code, comments, documentation, or commit messages. Use plain text only.

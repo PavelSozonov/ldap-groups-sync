@@ -1,8 +1,7 @@
-version: '3.8'
 services:
   sync:
     build: .
-    env_file: .env.example
+    env_file: .env
     ports:
       - '8000:8000'
     depends_on:
@@ -11,10 +10,48 @@ services:
   openldap:
     image: bitnami/openldap
     environment:
+      - LDAP_ROOT=dc=example,dc=com
       - LDAP_ADMIN_USERNAME=admin
       - LDAP_ADMIN_PASSWORD=adminpassword
+      - LDAP_ROOT_PASSWORD=adminpassword
       - LDAP_USERS=demo
+      - LDAP_PASSWORDS=demopassword
   openwebui:
     image: ghcr.io/open-webui/open-webui
     ports:
       - '8080:8080'
+    environment:
+      - ENABLE_SIGNUP=true
+      - DEFAULT_USER_ROLE=admin
+      - ADMIN_EMAIL=admin@example.com
+      - ENABLE_PERSISTENT_CONFIG=false
+      - ENV=dev
+  
+  mock-api:
+    build: .
+    command: python scripts/mock_api.py
+    ports:
+      - '8081:8081'
+  
+  # Disabled to prevent API key overwrites
+  # owui-setup:
+  #   build: .
+  #   command: python scripts/generate_api_key.py
+  #   environment:
+  #     - OWUI_ADMIN_NAME=Admin User
+  #     - OWUI_ADMIN_EMAIL=admin@example.com
+  #     - OWUI_ADMIN_PASSWORD=adminpassword
+  #     - OWUI_BASE_URL=http://openwebui:8080
+  #   depends_on:
+  #     - openwebui
+  #   volumes:
+  #     - ./.owui_api_key:/app/.owui_api_key
+
+  # config-updater:
+  #   build: .
+  #   command: python scripts/update_config.py
+  #   volumes:
+  #     - ./config:/app/config
+  #     - ./.owui_api_key:/app/.owui_api_key
+  #   depends_on:
+  #     - owui-setup

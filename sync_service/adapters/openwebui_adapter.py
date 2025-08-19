@@ -47,6 +47,8 @@ class OpenWebUIAdapter:
         if resp.is_error:
             owui_http_errors_total.inc()
             resp.raise_for_status()
+        print(f"Response status: {resp.status_code}")
+        print(f"Response text: {resp.text}")
         return resp.json()
 
     def list_users(self) -> List[Dict[str, Any]]:
@@ -55,7 +57,11 @@ class OpenWebUIAdapter:
         if resp.is_error:
             owui_http_errors_total.inc()
             resp.raise_for_status()
-        return resp.json()
+        data = resp.json()
+        # OpenWebUI returns {"users": [...], "total": N} format
+        if isinstance(data, dict) and "users" in data:
+            return data["users"]
+        return data
 
     def list_group_users(self, group_id: str) -> List[Dict[str, Any]]:
         with track_external_request("owui"):
@@ -68,7 +74,7 @@ class OpenWebUIAdapter:
     def add_user_to_group(self, group_id: str, user_id: str) -> None:
         url = self._url("add_user_to_group", group_id=group_id)
         with track_external_request("owui"):
-            resp = self.client.post(url, json={"user_id": user_id})
+            resp = self.client.post(url, json={"user_ids": [user_id]})
         if resp.is_error:
             owui_http_errors_total.inc()
             resp.raise_for_status()
@@ -77,6 +83,20 @@ class OpenWebUIAdapter:
         url = self._url("remove_user_from_group", group_id=group_id, user_id=user_id)
         with track_external_request("owui"):
             resp = self.client.delete(url)
+        if resp.is_error:
+            owui_http_errors_total.inc()
+            resp.raise_for_status()
+
+    def update_group_users(self, group_id: str, user_ids: List[str], group_name: str, group_description: str = "") -> None:
+        """Update the entire user list for a group."""
+        url = self._url("update_group", group_id=group_id)
+        data = {
+            "name": group_name,
+            "description": group_description,
+            "user_ids": user_ids
+        }
+        with track_external_request("owui"):
+            resp = self.client.post(url, json=data)
         if resp.is_error:
             owui_http_errors_total.inc()
             resp.raise_for_status()
